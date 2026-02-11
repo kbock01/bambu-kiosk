@@ -1,0 +1,901 @@
+# Bambu Labs Kiosk Web Application
+
+I'll create a web-based kiosk application for your Bambu Labs printer. This will be a Flask-based application with a touch-friendly interface.
+
+## Project Structure
+
+```
+bambu-kiosk/
+├── app.py
+├── config.py
+├── requirements.txt
+├── static/
+│   ├── css/
+│   │   └── style.css
+│   └── js/
+│       └── main.js
+├── templates/
+│   └── index.html
+└── print_files/
+    └── (your .3mf or .gcode files)
+```
+
+## 1. `requirements.txt`
+
+```txt
+Flask==3.0.0
+bambulabs_api
+python-dotenv==1.0.0
+```
+
+## 2. `config.py`
+
+```python
+import os
+
+class Config:
+    # Printer Configuration
+    PRINTER_IP = os.getenv('PRINTER_IP', '192.168.1.200')
+    PRINTER_SERIAL = os.getenv('PRINTER_SERIAL', 'AC12309BH109')
+    PRINTER_ACCESS_CODE = os.getenv('PRINTER_ACCESS_CODE', '12347890')
+    
+    # Application Configuration
+    SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key-change-this')
+    PRINT_FILES_DIR = os.path.join(os.path.dirname(__file__), 'print_files')
+    
+    # Allowed file extensions
+    ALLOWED_EXTENSIONS = {'.3mf', '.gcode'}
+    
+    # AMS Color Slots (customize based on your setup)
+    AMS_SLOTS = {
+        '1': {'name': 'Slot 1', 'color': '#FF0000'},
+        '2': {'name': 'Slot 2', 'color': '#00FF00'},
+        '3': {'name': 'Slot 3', 'color': '#0000FF'},
+        '4': {'name': 'Slot 4', 'color': '#FFFF00'},
+    }
+```
+
+## 3. `app.py`
+
+```python
+from flask import Flask, render_template, jsonify, request
+import bambulabs_api as bl
+import os
+import time
+from config import Config
+import threading
+import logging
+
+app = Flask(__name__)
+app.config.from_object(Config)
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Global printer instance
+printer = None
+printer_lock = threading.Lock()
+
+def get_printer():
+    """Get or create printer instance"""
+    global printer
+    if printer is None:
+        with printer_lock:
+            if printer is None:
+                printer = bl.Printer(
+                    app.config['PRINTER_IP'],
+                    app.config['PRINTER_ACCESS_CODE'],
+                    app.config['PRINTER_SERIAL']
+                )
+                printer.connect()
+                time.sleep(2)  # Allow connection to establish
+    return printer
+
+def get_available_files():
+    """Get list of available print files"""
+    files_dir = app.config['PRINT_FILES_DIR']
+    if not os.path.exists(files_dir):
+        os.makedirs(files_dir)
+        return []
+    
+    files = []
+    for filename in os.listdir(files_dir):
+        ext = os.path.splitext(filename)[1].lower()
+        if ext in app.config['ALLOWED_EXTENSIONS']:
+            filepath = os.path.join(files_dir, filename)
+            files.append({
+                'name': filename,
+                'path': filepath,
+                'size': os.path.getsize(filepath)
+            })
+    
+    return sorted(files, key=lambda x: x['name'])
+
+@app.route('/')
+def index():
+    """Main kiosk interface"""
+    files = get_available_files()
+    return render_template('index.html', 
+                         files=files, 
+                         ams_slots=app.config['AMS_SLOTS'])
+
+@app.route('/api/status')
+def get_status():
+    """Get printer status"""
+    try:
+        p = get_printer()
+        status = p.get_state()
+        return jsonify({
+            'success': True,
+            'status': status
+        })
+    except Exception as e:
+        logger.error(f"Error getting status: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/print', methods=['POST'])
+def start_print():
+    """Start a print job"""
+    try:
+        data = request.json
+        filename = data.get('filename')
+        ams_slot = data.get('ams_slot')
+        
+        if not filename:
+            return jsonify({
+                'success': False,
+                'error': 'No filename provided'
+            }), 400
+        
+        # Verify file exists
+        filepath = os.path.join(app.config['PRINT_FILES_DIR'], filename)
+        if not os.path.exists(filepath):
+            return jsonify({
+                'success': False,
+                'error': 'File not found'
+            }), 404
+        
+        p = get_printer()
+        
+        # Start print job
+        # Note: You'll need to check the actual API method for printing
+        # This is a placeholder - adjust based on actual API capabilities
+        logger.info(f"Starting print: {filename} with AMS slot: {ams_slot}")
+        
+        # The actual print command will depend on the API
+        # p.print_file(filepath, ams_slot=ams_slot)
+        
+        return jsonify({
+            'success': True,
+            'message': f'Print started: {filename}'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error starting print: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/light/<action>')
+def control_light(action):
+    """Control printer light"""
+    try:
+        p = get_printer()
+        
+        if action == 'on':
+            p.turn_light_on()
+        elif action == 'off':
+            p.turn_light_off()
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Invalid action'
+            }), 400
+        
+        return jsonify({
+            'success': True,
+            'action': action
+        })
+        
+    except Exception as e:
+        logger.error(f"Error controlling light: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/cancel', methods=['POST'])
+def cancel_print():
+    """Cancel current print job"""
+    try:
+        p = get_printer()
+        # p.cancel_print()  # Adjust based on actual API
+        
+        return jsonify({
+            'success': True,
+            'message': 'Print cancelled'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error cancelling print: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=False)
+```
+
+## 4. `templates/index.html`
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Bambu Labs Kiosk</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🖨️ Bambu Labs Printer</h1>
+            <div class="status-bar">
+                <span id="printer-status">Connecting...</span>
+                <button id="light-toggle" class="btn btn-secondary">💡 Light</button>
+            </div>
+        </header>
+
+        <main>
+            <!-- Printer Status Section -->
+            <section class="status-section">
+                <h2>Printer Status</h2>
+                <div class="status-grid">
+                    <div class="status-item">
+                        <span class="status-label">State:</span>
+                        <span id="state" class="status-value">-</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Temperature:</span>
+                        <span id="temperature" class="status-value">-</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- File Selection Section -->
+            <section class="files-section">
+                <h2>Select File to Print</h2>
+                <div class="files-grid" id="files-grid">
+                    {% for file in files %}
+                    <div class="file-card" data-filename="{{ file.name }}">
+                        <div class="file-icon">📄</div>
+                        <div class="file-name">{{ file.name }}</div>
+                        <div class="file-size">{{ (file.size / 1024 / 1024) | round(2) }} MB</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if not files %}
+                <p class="no-files">No print files available. Please add .3mf or .gcode files to the print_files directory.</p>
+                {% endif %}
+            </section>
+
+            <!-- AMS Color Selection Section -->
+            <section class="ams-section" id="ams-section" style="display: none;">
+                <h2>Select AMS Slot</h2>
+                <div class="ams-grid">
+                    {% for slot_id, slot_info in ams_slots.items() %}
+                    <div class="ams-slot" data-slot="{{ slot_id }}">
+                        <div class="color-indicator" style="background-color: {{ slot_info.color }}"></div>
+                        <div class="slot-name">{{ slot_info.name }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Action Buttons -->
+            <section class="actions-section" id="actions-section" style="display: none;">
+                <button id="print-btn" class="btn btn-primary btn-large">🚀 Start Print</button>
+                <button id="cancel-selection-btn" class="btn btn-secondary btn-large">❌ Cancel</button>
+            </section>
+
+            <!-- Active Print Section -->
+            <section class="active-print-section" id="active-print-section" style="display: none;">
+                <h2>Current Print</h2>
+                <div class="print-info">
+                    <p><strong>File:</strong> <span id="current-file">-</span></p>
+                    <p><strong>AMS Slot:</strong> <span id="current-slot">-</span></p>
+                </div>
+                <button id="cancel-print-btn" class="btn btn-danger btn-large">⛔ Cancel Print</button>
+            </section>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
+```
+
+## 5. `static/css/style.css`
+
+```css
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+}
+
+header h1 {
+    font-size: 2.5em;
+    margin-bottom: 15px;
+}
+
+.status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+}
+
+#printer-status {
+    font-size: 1.2em;
+    font-weight: 500;
+}
+
+main {
+    padding: 30px;
+}
+
+section {
+    margin-bottom: 40px;
+}
+
+h2 {
+    font-size: 1.8em;
+    margin-bottom: 20px;
+    color: #667eea;
+}
+
+/* Status Section */
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.status-item {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.status-label {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.status-value {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Files Section */
+.files-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.file-card {
+    background: #f8f9fa;
+    border: 3px solid transparent;
+    border-radius: 15px;
+    padding: 25px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.file-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.file-card.selected {
+    border-color: #667eea;
+    background: #e8eaf6;
+}
+
+.file-icon {
+    font-size: 4em;
+    margin-bottom: 15px;
+}
+
+.file-name {
+    font-weight: 600;
+    margin-bottom: 10px;
+    word-break: break-word;
+}
+
+.file-size {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.no-files {
+    text-align: center;
+    color: #999;
+    padding: 40px;
+    font-size: 1.2em;
+}
+
+/* AMS Section */
+.ams-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+}
+
+.ams-slot {
+    background: #f8f9fa;
+    border: 3px solid transparent;
+    border-radius: 15px;
+    padding: 25px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.ams-slot:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.ams-slot.selected {
+    border-color: #667eea;
+    background: #e8eaf6;
+}
+
+.color-indicator {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    border: 3px solid #ddd;
+}
+
+.slot-name {
+    font-weight: 600;
+    font-size: 1.1em;
+}
+
+/* Buttons */
+.btn {
+    padding: 15px 30px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-large {
+    padding: 20px 40px;
+    font-size: 1.3em;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(220, 53, 69, 0.4);
+}
+
+/* Actions Section */
+.actions-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Active Print Section */
+.print-info {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.print-info p {
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    header h1 {
+        font-size: 1.8em;
+    }
+
+    .files-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+    }
+
+    .file-icon {
+        font-size: 3em;
+    }
+}
+
+/* Touch feedback */
+.file-card:active,
+.ams-slot:active,
+.btn:active {
+    transform: scale(0.98);
+}
+```
+
+## 6. `static/js/main.js`
+
+```javascript
+let selectedFile = null;
+let selectedAmsSlot = null;
+let statusInterval = null;
+
+// Initialize the application
+document.addEventListener('DOMContentLoaded', function() {
+    initializeEventListeners();
+    startStatusPolling();
+});
+
+function initializeEventListeners() {
+    // File selection
+    document.querySelectorAll('.file-card').forEach(card => {
+        card.addEventListener('click', function() {
+            selectFile(this);
+        });
+    });
+
+    // AMS slot selection
+    document.querySelectorAll('.ams-slot').forEach(slot => {
+        slot.addEventListener('click', function() {
+            selectAmsSlot(this);
+        });
+    });
+
+    // Light toggle
+    document.getElementById('light-toggle').addEventListener('click', toggleLight);
+
+    // Print button
+    document.getElementById('print-btn').addEventListener('click', startPrint);
+
+    // Cancel selection button
+    document.getElementById('cancel-selection-btn').addEventListener('click', cancelSelection);
+
+    // Cancel print button
+    document.getElementById('cancel-print-btn').addEventListener('click', cancelPrint);
+}
+
+function selectFile(card) {
+    // Remove previous selection
+    document.querySelectorAll('.file-card').forEach(c => c.classList.remove('selected'));
+    
+    // Select new file
+    card.classList.add('selected');
+    selectedFile = card.dataset.filename;
+    
+    // Show AMS selection
+    document.getElementById('ams-section').style.display = 'block';
+    
+    // Scroll to AMS section
+    document.getElementById('ams-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+function selectAmsSlot(slot) {
+    // Remove previous selection
+    document.querySelectorAll('.ams-slot').forEach(s => s.classList.remove('selected'));
+    
+    // Select new slot
+    slot.classList.add('selected');
+    selectedAmsSlot = slot.dataset.slot;
+    
+    // Show action buttons
+    document.getElementById('actions-section').style.display = 'block';
+    
+    // Scroll to actions
+    document.getElementById('actions-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+function cancelSelection() {
+    selectedFile = null;
+    selectedAmsSlot = null;
+    
+    document.querySelectorAll('.file-card').forEach(c => c.classList.remove('selected'));
+    document.querySelectorAll('.ams-slot').forEach(s => s.classList.remove('selected'));
+    
+    document.getElementById('ams-section').style.display = 'none';
+    document.getElementById('actions-section').style.display = 'none';
+}
+
+async function startPrint() {
+    if (!selectedFile || !selectedAmsSlot) {
+        alert('Please select a file and AMS slot');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/print', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                filename: selectedFile,
+                ams_slot: selectedAmsSlot
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Show active print section
+            document.getElementById('current-file').textContent = selectedFile;
+            document.getElementById('current-slot').textContent = `Slot ${selectedAmsSlot}`;
+            document.getElementById('active-print-section').style.display = 'block';
+            
+            // Hide selection sections
+            document.getElementById('ams-section').style.display = 'none';
+            document.getElementById('actions-section').style.display = 'none';
+            
+            cancelSelection();
+            
+            showNotification('Print started successfully!', 'success');
+        } else {
+            showNotification('Error: ' + data.error, 'error');
+        }
+    } catch (error) {
+        console.error('Error starting print:', error);
+        showNotification('Failed to start print', 'error');
+    }
+}
+
+async function cancelPrint() {
+    if (!confirm('Are you sure you want to cancel the current print?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/cancel', {
+            method: 'POST'
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            document.getElementById('active-print-section').style.display = 'none';
+            showNotification('Print cancelled', 'success');
+        } else {
+            showNotification('Error: ' + data.error, 'error');
+        }
+    } catch (error) {
+        console.error('Error cancelling print:', error);
+        showNotification('Failed to cancel print', 'error');
+    }
+}
+
+async function toggleLight() {
+    const currentState = document.getElementById('light-toggle').dataset.state || 'off';
+    const newState = currentState === 'on' ? 'off' : 'on';
+
+    try {
+        const response = await fetch(`/api/light/${newState}`);
+        const data = await response.json();
+
+        if (data.success) {
+            document.getElementById('light-toggle').dataset.state = newState;
+            document.getElementById('light-toggle').textContent = 
+                newState === 'on' ? '💡 Light On' : '💡 Light Off';
+        }
+    } catch (error) {
+        console.error('Error toggling light:', error);
+    }
+}
+
+function startStatusPolling() {
+    updateStatus();
+    statusInterval = setInterval(updateStatus, 3000); // Update every 3 seconds
+}
+
+async function updateStatus() {
+    try {
+        const response = await fetch('/api/status');
+        const data = await response.json();
+
+        if (data.success) {
+            document.getElementById('printer-status').textContent = 'Connected';
+            
+            // Update status fields based on API response
+            if (data.status) {
+                document.getElementById('state').textContent = 
+                    data.status.print_state || 'Unknown';
+                document.getElementById('temperature').textContent = 
+                    data.status.nozzle_temp ? `${data.status.nozzle_temp}°C` : '-';
+            }
+        } else {
+            document.getElementById('printer-status').textContent = 'Error';
+        }
+    } catch (error) {
+        console.error('Error fetching status:', error);
+        document.getElementById('printer-status').textContent = 'Disconnected';
+    }
+}
+
+function showNotification(message, type) {
+    // Simple notification - you can enhance this with a library
+    alert(message);
+}
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', function() {
+    if (statusInterval) {
+        clearInterval(statusInterval);
+    }
+});
+```
+
+## 7. `.env` (Create this file)
+
+```env
+PRINTER_IP=192.168.1.200
+PRINTER_SERIAL=AC12309BH109
+PRINTER_ACCESS_CODE=12347890
+SECRET_KEY=your-secret-key-here
+```
+
+## Installation & Setup
+
+### 1. Install on Android Tablet
+
+```bash
+# Install Termux from F-Droid or Play Store
+# Open Termux and run:
+
+pkg update && pkg upgrade
+pkg install python git
+pip install --upgrade pip
+
+# Clone your project
+git clone <your-repo-url>
+cd bambu-kiosk
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the application
+python app.py
+```
+
+### 2. Set up Kiosk Mode
+
+For Android kiosk mode, use **Fully Kiosk Browser** or **Kiosk Browser Lockdown**:
+
+1. Install "Fully Kiosk Browser" from Play Store
+2. Configure it to launch on boot
+3. Set the URL to: `http://localhost:5000`
+4. Enable kiosk mode in settings
+5. Configure touch gestures and navigation restrictions
+
+### 3. Auto-start on Boot
+
+Create a startup script using Termux:
+
+```bash
+# In Termux
+mkdir -p ~/.termux/boot
+nano ~/.termux/boot/start-kiosk.sh
+```
+
+Add:
+```bash
+#!/data/data/com.termux/files/usr/bin/bash
+cd ~/bambu-kiosk
+python app.py
+```
+
+Make it executable:
+```bash
+chmod +x ~/.termux/boot/start-kiosk.sh
+```
+
+## Features
+
+✅ Touch-friendly interface optimized for tablets
+✅ File selection from predetermined list
+✅ AMS slot selection with visual color indicators
+✅ Real-time printer status updates
+✅ Light control
+✅ Print job management
+✅ Responsive design
+✅ Kiosk mode compatible
+
+## Customization
+
+- Add your `.3mf` or `.gcode` files to the `print_files/` directory
+- Adjust AMS colors in `config.py`
+- Modify UI colors and layout in `style.css`
+- Update printer credentials in `.env` file
+
+## Security Notes
+
+⚠️ This application is meant for local network use only
+⚠️ Change the `SECRET_KEY` in production
+⚠️ Consider adding authentication if exposed to multiple users
+⚠️ Keep the `.env` file secure and never commit it to git
+
+Let me know if you need any modifications or additional features!

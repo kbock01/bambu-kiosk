@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Bambu Labs Kiosk</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🖨️ Bambu Labs Printer</h1>
+            <div class="status-bar">
+                <span id="printer-status">Connecting...</span>
+                <button id="light-toggle" class="btn btn-secondary">💡 Light</button>
+            </div>
+        </header>
+
+        <main>
+            <!-- Printer Status Section -->
+            <section class="status-section">
+                <h2>Printer Status</h2>
+                <div class="status-grid">
+                    <div class="status-item">
+                        <span class="status-label">State:</span>
+                        <span id="state" class="status-value">-</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Temperature:</span>
+                        <span id="temperature" class="status-value">-</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- File Selection Section -->
+            <section class="files-section">
+                <h2>Select File to Print</h2>
+                <div class="files-grid" id="files-grid">
+                    {% for file in files %}
+                    <div class="file-card" data-filename="{{ file.name }}">
+                        <div class="file-icon">📄</div>
+                        <div class="file-name">{{ file.name }}</div>
+                        <div class="file-size">{{ (file.size / 1024 / 1024) | round(2) }} MB</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if not files %}
+                <p class="no-files">No print files available. Please add .3mf or .gcode files to the print_files directory.</p>
+                {% endif %}
+            </section>
+
+            <!-- AMS Color Selection Section -->
+            <section class="ams-section" id="ams-section" style="display: none;">
+                <h2>Select AMS Slot</h2>
+                <div class="ams-grid">
+                    {% for slot_id, slot_info in ams_slots.items() %}
+                    <div class="ams-slot" data-slot="{{ slot_id }}">
+                        <div class="color-indicator" style="background-color: {{ slot_info.color }}"></div>
+                        <div class="slot-name">{{ slot_info.name }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Action Buttons -->
+            <section class="actions-section" id="actions-section" style="display: none;">
+                <button id="print-btn" class="btn btn-primary btn-large">🚀 Start Print</button>
+                <button id="cancel-selection-btn" class="btn btn-secondary btn-large">❌ Cancel</button>
+            </section>
+
+            <!-- Active Print Section -->
+            <section class="active-print-section" id="active-print-section" style="display: none;">
+                <h2>Current Print</h2>
+                <div class="print-info">
+                    <p><strong>File:</strong> <span id="current-file">-</span></p>
+                    <p><strong>AMS Slot:</strong> <span id="current-slot">-</span></p>
+                </div>
+                <button id="cancel-print-btn" class="btn btn-danger btn-large">⛔ Cancel Print</button>
+            </section>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

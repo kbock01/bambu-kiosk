@@ -1,0 +1,31 @@
+{
+  "files": [
+    {
+      "id": "file1",
+      "name": "Benchy",
+      "filename": "benchy.3mf",
+      "thumbnail": "/static/images/benchy.png",
+      "description": "Classic 3D Benchy test print",
+      "supports_ams": true,
+      "filament_colors": 1
+    },
+    {
+      "id": "file2",
+      "name": "Calibration Cube",
+      "filename": "calibration_cube.3mf",
+      "thumbnail": "/static/images/cube.png",
+      "description": "20mm calibration cube",
+      "supports_ams": true,
+      "filament_colors": 1
+    },
+    {
+      "id": "file3",
+      "name": "Multi-Color Vase",
+      "filename": "vase_multicolor.3mf",
+      "thumbnail": "/static/images/vase.png",
+      "description": "Decorative vase with multiple colors",
+      "supports_ams": true,
+      "filament_colors": 3
+    }
+  ]
+}
