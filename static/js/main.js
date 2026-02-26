@@ -91,7 +91,7 @@ async function startPrint() {
             },
             body: JSON.stringify({
                 filename: selectedFile,
-                ams_slot: selectedAmsSlot
+                ams_slot: selectedAmsSlot - 1
             })
         });
 
@@ -108,8 +108,6 @@ async function startPrint() {
             document.getElementById('actions-section').style.display = 'none';
             
             cancelSelection();
-            
-            showNotification('Print started successfully!', 'success');
         } else {
             showNotification('Error: ' + data.error, 'error');
         }
@@ -133,7 +131,6 @@ async function cancelPrint() {
 
         if (data.success) {
             document.getElementById('active-print-section').style.display = 'none';
-            showNotification('Print cancelled', 'success');
         } else {
             showNotification('Error: ' + data.error, 'error');
         }
@@ -176,10 +173,20 @@ async function updateStatus() {
             
             // Update status fields based on API response
             if (data.status) {
+                // console.log(data.status)
+                // if (data.status.print_state === 'FINISH')
+                // {
+                //     document.getElementById('active-print-section').style.display = 'none';
+                // }
                 document.getElementById('state').textContent = 
                     data.status.print_state || 'Unknown';
                 document.getElementById('temperature').textContent = 
                     data.status.nozzle_temp ? `${data.status.nozzle_temp}°C` : '-';
+                document.getElementById('time_remaining').textContent = 
+                    data.status.time_remaining ? `${data.status.time_remaining} seconds` : '-';
+                document.getElementById('light-toggle').dataset.state = data.status.light_state;
+                document.getElementById('light-toggle').textContent = 
+                    data.status.light_state === 'on' ? '💡 Light On' : '💡 Light Off';
             }
         } else {
             document.getElementById('printer-status').textContent = 'Error';

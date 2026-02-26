@@ -1,10 +1,15 @@
 import os
 
 class Config:
-    # Printer Configuration
-    PRINTER_IP = os.getenv('PRINTER_IP', '192.168.1.200')
-    PRINTER_SERIAL = os.getenv('PRINTER_SERIAL', 'AC12309BH109')
-    PRINTER_ACCESS_CODE = os.getenv('PRINTER_ACCESS_CODE', '12347890')
+    # Left Printer Configuration
+    PRINTER_IP = os.getenv('PRINTER_IP', '192.168.0.157')
+    PRINTER_SERIAL = os.getenv('PRINTER_SERIAL', '22E8AJ5B2901941')
+    PRINTER_ACCESS_CODE = os.getenv('PRINTER_ACCESS_CODE', 'fe24afde')
+
+    # Right Printer Configuration
+    # PRINTER_IP = os.getenv('PRINTER_IP', '192.168.0.84')
+    # PRINTER_SERIAL = os.getenv('PRINTER_SERIAL', '22E8AJ5C0201826')
+    # PRINTER_ACCESS_CODE = os.getenv('PRINTER_ACCESS_CODE', 'fa1cb76f')
     
     # Application Configuration
     SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key-change-this')
@@ -20,3 +25,5 @@ class Config:
         '3': {'name': 'Slot 3', 'color': '#0000FF'},
         '4': {'name': 'Slot 4', 'color': '#FFFF00'},
     }
+
+    CAMERA_ENABLED = False

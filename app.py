@@ -5,6 +5,10 @@ import time
 from config import Config
 import threading
 import logging
+import base64
+import sys
+from io import BytesIO
+import zipfile
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -17,6 +21,23 @@ logger = logging.getLogger(__name__)
 printer = None
 printer_lock = threading.Lock()
 
+def gcode_files_in_3mf(
+        zipfile_path: str) -> list[str]:
+    """
+    Get the gcodefiles in the 3mf.
+
+    Args:
+        zipfile_path (str): location of the text file.
+
+    Returns:
+        list[str]: first gcode file, or None if not found
+    """
+    zf = zipfile.ZipFile(zipfile_path)
+
+    nl = zf.namelist()
+    print(nl)
+    return [n for n in nl if n.endswith(".gcode") and n.startswith("Metadata/plate_")]  # noqa: E501
+
 def get_printer():
     """Get or create printer instance"""
     global printer
@@ -26,7 +47,8 @@ def get_printer():
                 printer = bl.Printer(
                     app.config['PRINTER_IP'],
                     app.config['PRINTER_ACCESS_CODE'],
-                    app.config['PRINTER_SERIAL']
+                    app.config['PRINTER_SERIAL'],
+                    app.config['CAMERA_ENABLED']
                 )
                 printer.connect()
                 time.sleep(2)  # Allow connection to establish
@@ -44,30 +66,38 @@ def get_available_files():
         ext = os.path.splitext(filename)[1].lower()
         if ext in app.config['ALLOWED_EXTENSIONS']:
             filepath = os.path.join(files_dir, filename)
-            files.append({
-                'name': filename,
-                'path': filepath,
-                'size': os.path.getsize(filepath)
-            })
+            basename, _ = os.path.splitext(filepath)
+            with open(basename + ".png", "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+                files.append({
+                    'name': filename,
+                    'path': filepath,
+                    'size': os.path.getsize(filepath),
+                    'image_data': encoded_string
+                })
     
     return sorted(files, key=lambda x: x['name'])
 
 @app.route('/')
 def index():
     """Main kiosk interface"""
+    # files = get_available_files()
+    # return render_template('index.html', 
+    #                      files=files, 
+    #                      ams_slots=app.config['AMS_SLOTS'])
+    """Main kiosk interface"""
     files = get_available_files()
 
-    p = get_printer()
-    ams_hub = p.ams_hub()
-    filament_trays = ams_hub[0]
+    ams_hub = printer.ams_hub()
+    filament_trays = ams_hub[0].filament_trays
     AMS_SLOTS = {}
 
-    for idx, tray in enumerate(filament_trays):
+    for idx, tray in filament_trays.items():
         slot_number = idx + 1
         AMS_SLOTS[str(slot_number)] = {
             'name': tray.tray_id_name,
-            'color': tray.tray_color if tray.tray_color else '#FFFFFF'  # Default to white if no color provided
-        
+            'color': ("#" + tray.tray_color) if tray.tray_color else '#FFFFFF'  # Default to white if no color provided
+        }
     return render_template('index.html', 
                          files=files, 
                          ams_slots=AMS_SLOTS)
@@ -76,11 +106,14 @@ def index():
 def get_status():
     """Get printer status"""
     try:
-        p = get_printer()
-        status = p.get_state()
+        status = printer.get_state()
+        nozzle_temp = printer.get_nozzle_temperature()
+        time_remaining = printer.get_time()
+        light_state = printer.get_light_state()
         return jsonify({
             'success': True,
-            'status': status
+            'status': {'print_state': status, 'nozzle_temp': nozzle_temp, 
+                       'time_remaining': time_remaining, 'light_state': light_state}
         })
     except Exception as e:
         logger.error(f"Error getting status: {e}")
@@ -96,7 +129,8 @@ def start_print():
         data = request.json
         filename = data.get('filename')
         ams_slot = data.get('ams_slot')
-        
+        basename, _ = os.path.splitext(filename)
+
         if not filename:
             return jsonify({
                 'success': False,
@@ -110,20 +144,35 @@ def start_print():
                 'success': False,
                 'error': 'File not found'
             }), 404
-        
-        p = get_printer()
-        
+                
         # Start print job
         # Note: You'll need to check the actual API method for printing
         # This is a placeholder - adjust based on actual API capabilities
-        logger.info(f"Starting print: {filename} with AMS slot: {ams_slot}")
-        
+        logger.info(f"Starting print: {basename} with AMS slot: {ams_slot}")
+
+        # gcode_location = next(
+        #     (i for i in gcode_files_in_3mf(filepath)), None)
+
+        # if gcode_location:
+        #     with open(filepath, "rb") as file:
+        #         io_file = BytesIO(file.read())
+        #     result = printer.upload_file(io_file, filename)
+        #     if "226" not in result:
+        #         print("Error Uploading File to Printer", file=sys.stdout)
+
+        #     else:
+        #         print("Done Uploading/Sending Start Print Command", file=sys.stdout)
+        #         printer.start_print(filename, 1)
+        #         print("Start Print Command Sent", file=sys.stdout)
+        # else:
+        #     print("No gcode file found in 3mf", file=sys.stdout)
+
         # The actual print command will depend on the API
-        p.start_print(filepath, 1, True, [int(slot) for slot in ams_slot.split(',')])
+        printer.start_print(os.path.basename(filename), 1, True, [ams_slot, -1, -1, -1, -1])
         
         return jsonify({
             'success': True,
-            'message': f'Print started: {filename}'
+            'message': f'Print started: {basename}'
         })
         
     except Exception as e:
@@ -137,12 +186,10 @@ def start_print():
 def control_light(action):
     """Control printer light"""
     try:
-        p = get_printer()
-        
         if action == 'on':
-            p.turn_light_on()
+            printer.turn_light_on()
         elif action == 'off':
-            p.turn_light_off()
+            printer.turn_light_off()
         else:
             return jsonify({
                 'success': False,
@@ -165,8 +212,7 @@ def control_light(action):
 def cancel_print():
     """Cancel current print job"""
     try:
-        p = get_printer()
-        p.stop_print()
+        printer.stop_print()
         
         return jsonify({
             'success': True,
@@ -181,4 +227,5 @@ def cancel_print():
         }), 500
 
 if __name__ == '__main__':
+    printer = get_printer()
     app.run(host='0.0.0.0', port=5000, debug=False)

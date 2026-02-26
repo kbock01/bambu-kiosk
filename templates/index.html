@@ -29,18 +29,20 @@
                         <span class="status-label">Temperature:</span>
                         <span id="temperature" class="status-value">-</span>
                     </div>
+                    <div class="status-item">
+                        <span class="status-label">Time Remaining:</span>
+                        <span id="time_remaining" class="status-value">-</span>
+                    </div>
                 </div>
             </section>
 
             <!-- File Selection Section -->
             <section class="files-section">
-                <h2>Select File to Print</h2>
+                <h2>Pick the pathway you are most interested in</h2>
                 <div class="files-grid" id="files-grid">
                     {% for file in files %}
                     <div class="file-card" data-filename="{{ file.name }}">
-                        <div class="file-icon">📄</div>
-                        <div class="file-name">{{ file.name }}</div>
-                        <div class="file-size">{{ (file.size / 1024 / 1024) | round(2) }} MB</div>
+                        <div class="file-icon"><img src="data:image/png;base64, {{ file.image_data }}" alt="Loaded Image"></div>
                     </div>
                     {% endfor %}
                 </div>
@@ -50,13 +52,12 @@
             </section>
 
             <!-- AMS Color Selection Section -->
-            <section class="ams-section" id="ams-section" style="display: none;">
-                <h2>Select AMS Slot</h2>
+            <section class="ams-section" id="ams-section">
+                <h2>Select a color</h2>
                 <div class="ams-grid">
                     {% for slot_id, slot_info in ams_slots.items() %}
                     <div class="ams-slot" data-slot="{{ slot_id }}">
                         <div class="color-indicator" style="background-color: {{ slot_info.color }}"></div>
-                        <div class="slot-name">{{ slot_info.name }}</div>
                     </div>
                     {% endfor %}
                 </div>
