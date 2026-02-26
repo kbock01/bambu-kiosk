@@ -109,11 +109,19 @@ def get_status():
         status = printer.get_state()
         nozzle_temp = printer.get_nozzle_temperature()
         time_remaining = printer.get_time()
+
+        # Calculate minutes and remaining seconds
+        minutes, seconds = divmod(time_remaining, 60)
+
+        # Format the result into a string (e.g., '16:40')
+        # The :02d ensures that single-digit seconds are zero-padded (e.g., '05' instead of '5')
+        formatted_time_remaining = "{:02d}:{:02d}".format(minutes, seconds)
+
         light_state = printer.get_light_state()
         return jsonify({
             'success': True,
             'status': {'print_state': status, 'nozzle_temp': nozzle_temp, 
-                       'time_remaining': time_remaining, 'light_state': light_state}
+                       'time_remaining': formatted_time_remaining, 'light_state': light_state}
         })
     except Exception as e:
         logger.error(f"Error getting status: {e}")

@@ -31,9 +31,6 @@ function initializeEventListeners() {
 
     // Cancel selection button
     document.getElementById('cancel-selection-btn').addEventListener('click', cancelSelection);
-
-    // Cancel print button
-    document.getElementById('cancel-print-btn').addEventListener('click', cancelPrint);
 }
 
 function selectFile(card) {
@@ -117,29 +114,6 @@ async function startPrint() {
     }
 }
 
-async function cancelPrint() {
-    if (!confirm('Are you sure you want to cancel the current print?')) {
-        return;
-    }
-
-    try {
-        const response = await fetch('/api/cancel', {
-            method: 'POST'
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            document.getElementById('active-print-section').style.display = 'none';
-        } else {
-            showNotification('Error: ' + data.error, 'error');
-        }
-    } catch (error) {
-        console.error('Error cancelling print:', error);
-        showNotification('Failed to cancel print', 'error');
-    }
-}
-
 async function toggleLight() {
     const currentState = document.getElementById('light-toggle').dataset.state || 'off';
     const newState = currentState === 'on' ? 'off' : 'on';
@@ -173,17 +147,17 @@ async function updateStatus() {
             
             // Update status fields based on API response
             if (data.status) {
-                // console.log(data.status)
-                // if (data.status.print_state === 'FINISH')
-                // {
-                //     document.getElementById('active-print-section').style.display = 'none';
-                // }
+                if (data.status.print_state === 'IDLE')
+                {
+                    document.getElementById('time_remaining').textContent = '-';
+                    cancelSelection();
+                }
                 document.getElementById('state').textContent = 
                     data.status.print_state || 'Unknown';
                 document.getElementById('temperature').textContent = 
                     data.status.nozzle_temp ? `${data.status.nozzle_temp}°C` : '-';
                 document.getElementById('time_remaining').textContent = 
-                    data.status.time_remaining ? `${data.status.time_remaining} seconds` : '-';
+                    data.status.formatted_time_remaining ? data.status.formatted_time_remaining : '-';
                 document.getElementById('light-toggle').dataset.state = data.status.light_state;
                 document.getElementById('light-toggle').textContent = 
                     data.status.light_state === 'on' ? '💡 Light On' : '💡 Light Off';
