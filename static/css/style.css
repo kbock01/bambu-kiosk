@@ -157,8 +157,8 @@ h2 {
 /* AMS Section */
 .ams-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(4, minmax(50px, 1fr));
+    gap: 10px;
 }
 
 .ams-slot {
