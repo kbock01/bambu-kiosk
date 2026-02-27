@@ -1,10 +1,14 @@
 import os
 
 class Config:
+    PRINTER_IP = os.getenv('PRINTER_IP', '127.0.0.1')
+    PRINTER_SERIAL = os.getenv('PRINTER_SERIAL', '01S00A123456789')
+    PRINTER_ACCESS_CODE = os.getenv('PRINTER_ACCESS_CODE', 'test1234')
+
     # Left Printer Configuration
-    PRINTER_IP = os.getenv('PRINTER_IP', '192.168.0.157')
-    PRINTER_SERIAL = os.getenv('PRINTER_SERIAL', '22E8AJ5B2901941')
-    PRINTER_ACCESS_CODE = os.getenv('PRINTER_ACCESS_CODE', 'fe24afde')
+    # PRINTER_IP = os.getenv('PRINTER_IP', '192.168.0.157')
+    # PRINTER_SERIAL = os.getenv('PRINTER_SERIAL', '22E8AJ5B2901941')
+    # PRINTER_ACCESS_CODE = os.getenv('PRINTER_ACCESS_CODE', 'fe24afde')
 
     # Right Printer Configuration
     # PRINTER_IP = os.getenv('PRINTER_IP', '192.168.0.84')

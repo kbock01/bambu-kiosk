@@ -115,8 +115,7 @@ def get_status():
 
         # Format the result into a string (e.g., '16:40')
         # The :02d ensures that single-digit seconds are zero-padded (e.g., '05' instead of '5')
-        formatted_time_remaining = "{:02d}:{:02d}".format(minutes, seconds)
-
+        formatted_time_remaining = "{:02d} min. {:02d} sec".format(minutes, seconds)
         light_state = printer.get_light_state()
         return jsonify({
             'success': True,

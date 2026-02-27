@@ -1,6 +1,7 @@
 let selectedFile = null;
 let selectedAmsSlot = null;
 let statusInterval = null;
+let startButtonClicked = false;
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
@@ -103,7 +104,8 @@ async function startPrint() {
             // Hide selection sections
             document.getElementById('ams-section').style.display = 'none';
             document.getElementById('actions-section').style.display = 'none';
-            
+            startButtonClicked = true;
+
             cancelSelection();
         } else {
             showNotification('Error: ' + data.error, 'error');
@@ -147,9 +149,11 @@ async function updateStatus() {
             
             // Update status fields based on API response
             if (data.status) {
-                if (data.status.print_state === 'IDLE')
+                if (startButtonClicked && data.status.print_state === 'IDLE')
                 {
+                    startButtonClicked = false;
                     document.getElementById('time_remaining').textContent = '-';
+                    document.getElementById('active-print-section').style.display = 'none';
                     cancelSelection();
                 }
                 document.getElementById('state').textContent = 
@@ -157,7 +161,7 @@ async function updateStatus() {
                 document.getElementById('temperature').textContent = 
                     data.status.nozzle_temp ? `${data.status.nozzle_temp}°C` : '-';
                 document.getElementById('time_remaining').textContent = 
-                    data.status.formatted_time_remaining ? data.status.formatted_time_remaining : '-';
+                    data.status.time_remaining ? data.status.time_remaining : '-';
                 document.getElementById('light-toggle').dataset.state = data.status.light_state;
                 document.getElementById('light-toggle').textContent = 
                     data.status.light_state === 'on' ? '💡 Light On' : '💡 Light Off';

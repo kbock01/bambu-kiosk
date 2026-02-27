@@ -97,7 +97,7 @@ class BambuP2SSimulator:
 
         # Printer state
         self.state = {
-            'print_status': 'idle',
+            'print_status': 'IDLE',
             'progress': 0,
             'remaining_time': 0,
             'bed_temp': 25.0,
@@ -125,26 +125,26 @@ class BambuP2SSimulator:
                         'temp': 25.0,
                         "tray": [
                             {
-                                "bed_temp": "0",
+                                "bed_temp": 0,
                                 "bed_temp_type": "0",
                                 "cols": [
                                     "FF0000FF"
                                 ],
-                                "drying_temp": "0",
-                                "drying_time": "0",
+                                "drying_temp": 0,
+                                "drying_time": 0,
                                 "id": "0",
-                                "nozzle_temp_max": "240",
-                                "nozzle_temp_min": "190",
+                                "nozzle_temp_max": 240,
+                                "nozzle_temp_min": 190,
                                 "remain": 0,
                                 "tag_uid": "0000000000000000",
                                 "tray_color": "FF0000FF",
-                                "tray_diameter": "0.00",
+                                "tray_diameter": 0.00,
                                 "tray_id_name": "",
                                 "tray_info_idx": "GFA00",
                                 "tray_sub_brands": "",
                                 "tray_type": "PLA",
                                 "tray_uuid": "00000000000000000000000000000000",
-                                "tray_weight": "0",
+                                "tray_weight": 0,
                                 "xcam_info": "000000000000000000000000",
                                 "k": 0.024,
                                 "n": 0.1,
@@ -152,26 +152,26 @@ class BambuP2SSimulator:
                                 "tray_time": 0
                             },
                             {
-                                "bed_temp": "0",
+                                "bed_temp": 0,
                                 "bed_temp_type": "0",
                                 "cols": [
                                     "000000FF"
                                 ],
-                                "drying_temp": "0",
-                                "drying_time": "0",
+                                "drying_temp": 0,
+                                "drying_time": 0,
                                 "id": "1",
-                                "nozzle_temp_max": "240",
-                                "nozzle_temp_min": "190",
+                                "nozzle_temp_max": 240,
+                                "nozzle_temp_min": 190,
                                 "remain": 0,
                                 "tag_uid": "0000000000000000",
                                 "tray_color": "000000FF",
-                                "tray_diameter": "0.00",
+                                "tray_diameter": 0.00,
                                 "tray_id_name": "",
                                 "tray_info_idx": "GFA00",
                                 "tray_sub_brands": "",
                                 "tray_type": "PLA",
                                 "tray_uuid": "00000000000000000000000000000000",
-                                "tray_weight": "0",
+                                "tray_weight": 0,
                                 "xcam_info": "000000000000000000000000",
                                 "k": 0.024,
                                 "n": 0.1,
@@ -179,26 +179,26 @@ class BambuP2SSimulator:
                                 "tray_time": 0
                             },
                             {
-                                "bed_temp": "0",
+                                "bed_temp": 0,
                                 "bed_temp_type": "0",
                                 "cols": [
                                     "DFE2E3FF"
                                 ],
-                                "drying_temp": "0",
-                                "drying_time": "0",
+                                "drying_temp": 0,
+                                "drying_time": 0,
                                 "id": "2",
-                                "nozzle_temp_max": "240",
-                                "nozzle_temp_min": "190",
+                                "nozzle_temp_max": 240,
+                                "nozzle_temp_min": 190,
                                 "remain": 0,
                                 "tag_uid": "0000000000000000",
                                 "tray_color": "DFE2E3FF",
-                                "tray_diameter": "0.00",
+                                "tray_diameter": 0.00,
                                 "tray_id_name": "",
                                 "tray_info_idx": "GFA05",
                                 "tray_sub_brands": "",
                                 "tray_type": "PLA",
                                 "tray_uuid": "00000000000000000000000000000000",
-                                "tray_weight": "0",
+                                "tray_weight": 0,
                                 "xcam_info": "000000000000000000000000",
                                 "k": 0.024,
                                 "n": 0.1,
@@ -206,26 +206,26 @@ class BambuP2SSimulator:
                                 "tray_time": 0
                             },
                             {
-                                "bed_temp": "0",
+                                "bed_temp": 0,
                                 "bed_temp_type": "0",
                                 "cols": [
                                     "F95959FF"
                                 ],
-                                "drying_temp": "0",
-                                "drying_time": "0",
+                                "drying_temp": 0,
+                                "drying_time": 0,
                                 "id": "3",
-                                "nozzle_temp_max": "240",
-                                "nozzle_temp_min": "190",
+                                "nozzle_temp_max": 240,
+                                "nozzle_temp_min": 190,
                                 "remain": 0,
                                 "tag_uid": "0000000000000000",
                                 "tray_color": "F95959FF",
-                                "tray_diameter": "0.00",
+                                "tray_diameter": 0.00,
                                 "tray_id_name": "",
                                 "tray_info_idx": "GFL00",
                                 "tray_sub_brands": "",
                                 "tray_type": "PLA",
                                 "tray_uuid": "00000000000000000000000000000000",
-                                "tray_weight": "0",
+                                "tray_weight": 0,
                                 "xcam_info": "000000000000000000000000",
                                 "k": 0.024,
                                 "n": 0.1,
@@ -240,11 +240,11 @@ class BambuP2SSimulator:
                 "power_on_flag": False,
                 "tray_exist_bits": "e",
                 "tray_is_bbl_bits": "e",
-                "tray_now": "255", # 254 if external spool / vt_tray, otherwise is ((ams_id * 4) + tray_id) for current tray (ams 2 tray 2 would be (1*4)+1 = 5)
-                "tray_pre": "255",
+                "tray_now": 255, # 254 if external spool / vt_tray, otherwise is ((ams_id * 4) + tray_id) for current tray (ams 2 tray 2 would be (1*4)+1 = 5)
+                "tray_pre": 255,
                 "tray_read_done_bits": "e",
                 "tray_reading_bits": "0",
-                "tray_tar": "255",
+                "tray_tar": 255,
                 "version": 4
             }
         }
@@ -810,7 +810,7 @@ class BambuP2SSimulator:
 
     def _send_message(self, client_socket: socket.socket, message: Dict[str, Any]):
        """Send JSON message to client via MQTT PUBLISH"""
-       self._send_mqtt_publish(client_socket, 'device/report', message)
+       self._send_mqtt_publish(client_socket, 'device/01S00A123456789/report', message)
 
     def _send_mqtt_publish(self, client_socket: socket.socket, topic: str, message: Dict[str, Any], qos: int = 0):
        """Send MQTT PUBLISH packet"""
@@ -867,6 +867,7 @@ class BambuP2SSimulator:
                'command': 'push_status',
                'msg': 0,
                'sequence_id': sequence_id,
+               'gcode_state': self.state['print_status'],
                'mc_print_stage': self.state['print_status'],
                'mc_percent': self.state['progress'],
                'mc_remaining_time': self.state['remaining_time'],
@@ -913,20 +914,20 @@ class BambuP2SSimulator:
                 elif command == 'get_version':
                     self._send_version(client_socket, sequence_id)
                     
-                elif command == 'start_print':
+                elif command == 'start_print' or command == 'project_file' :
                     self.current_file = command_data.get('gcode_file', 'test.gcode')
-                    self.state['print_status'] = 'printing'
+                    self.state['print_status'] = 'RUNNING'
                     self.state['progress'] = 0
                     self.state['layer_num'] = 0
                     self.state['total_layers'] = 100
                     self.state['remaining_time'] = 3600
                     
                     tray_id = command_data.get('ams_tray', 0)
-                    if tray_id < len(self.ams['ams'][0]['tray']):
-                        tray = self.ams['ams'][0]['tray'][tray_id]
+                    if tray_id < len(self.ams['ams']['ams'][0]['tray']):
+                        tray = self.ams['ams']['ams'][0]['tray'][tray_id]
                         self.state['bed_target_temp'] = tray['bed_temp']
                         self.state['nozzle_target_temp'] = tray['nozzle_temp_min'] + 10
-                        self.ams['tray_now'] = tray_id
+                        self.ams['ams']['tray_now'] = tray_id
                     
                     response = {
                         'print': {
@@ -938,7 +939,7 @@ class BambuP2SSimulator:
                     self._send_message(client_socket, response)
                     
                 elif command == 'pause':
-                    self.state['print_status'] = 'paused'
+                    self.state['print_status'] = 'PAUSED'
                     response = {
                         'print': {
                             'command': 'pause',
@@ -949,7 +950,7 @@ class BambuP2SSimulator:
                     self._send_message(client_socket, response)
                     
                 elif command == 'resume':
-                    self.state['print_status'] = 'printing'
+                    self.state['print_status'] = 'RUNNING'
                     response = {
                         'print': {
                             'command': 'resume',
@@ -963,11 +964,11 @@ class BambuP2SSimulator:
                     # Record as failed/cancelled
                     self._record_print_completion(success=False, reason=50331648)
                     
-                    self.state['print_status'] = 'idle'
+                    self.state['print_status'] = 'IDLE'
                     self.state['progress'] = 0
                     self.state['bed_target_temp'] = 0
                     self.state['nozzle_target_temp'] = 0
-                    self.ams['tray_now'] = 255
+                    self.ams['ams']['tray_now'] = 255
                     response = {
                         'print': {
                             'command': 'stop',
@@ -991,8 +992,8 @@ class BambuP2SSimulator:
                     
                 elif command == 'change_filament':
                     tray_id = command_data.get('target_ams', 0)
-                    if tray_id < len(self.ams['ams'][0]['tray']):
-                        self.ams['tray_now'] = tray_id
+                    if tray_id < len(self.ams['ams']['ams'][0]['tray']):
+                        self.ams['ams']['tray_now'] = tray_id
                         response = {
                             'print': {
                                 'command': 'change_filament',
@@ -1183,22 +1184,22 @@ class BambuP2SSimulator:
                 self.state['bed_temp'] = max(25, self.state['bed_temp'] - 0.3)
                 
             # Update print progress
-            if self.state['print_status'] == 'printing':
+            if self.state['print_status'] == 'RUNNING':
                 if self.state['progress'] < 100:
-                    self.state['progress'] += 0.1
+                    self.state['progress'] += 10
                     self.state['remaining_time'] = int((100 - self.state['progress']) * 36)
                     self.state['layer_num'] = int(self.state['progress'])
                     
                     # Simulate material usage
-                    if self.ams['tray_now'] != 255:
-                        tray = self.ams['ams'][0]['tray'][self.ams['tray_now']]
+                    if self.ams['ams']['tray_now'] != 255:
+                        tray = self.ams['ams']['ams'][0]['tray'][self.ams['ams']['tray_now']]
                         if tray['remain'] > 0:
                             tray['remain'] = max(0, tray['remain'] - 0.01)
                 else:
                     # Record successful completion
                     self._record_print_completion(success=True)
 
-                    self.state['print_status'] = 'finished'
+                    self.state['print_status'] = 'IDLE'
                     self.state['progress'] = 100
                     self.state['remaining_time'] = 0
                     
