@@ -513,14 +513,14 @@ class PrinterMQTTClient:
                 {
                     "ams_mapping": ams_mapping,
                     "auto_bed_leveling": 0,
-                    "bed_leveling": True,
+                    "bed_leveling": False,
                     "bed_type": "auto",
                     "cfg": "0",
                     "command": "project_file",
                     "extrude_cali_flag": 0,
                     "extrude_cali_manual_mode": 0,
                     "file": filename,
-                    "flow_cali": bool(flow_calibration),
+                    "flow_cali": False,
                     "layer_inspect": True,
                     "md5": "from_sd_card",
                     "nozzle_offset_cali": 2,
@@ -534,7 +534,7 @@ class PrinterMQTTClient:
                     "timelapse": False,
                     "url": f"file:///media/usb0/{filename}",
                     "use_ams": True,
-                    "vibration_cali": True
+                    "vibration_cali": False
                 }
             })
 

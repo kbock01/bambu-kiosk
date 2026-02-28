@@ -67,12 +67,10 @@ def get_available_files():
         if ext in app.config['ALLOWED_EXTENSIONS']:
             filepath = os.path.join(files_dir, filename)
             basename, _ = os.path.splitext(filepath)
-            with open(basename + ".png", "rb") as image_file:
+            with open(filepath, "rb") as image_file:
                 encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
                 files.append({
-                    'name': filename,
-                    'path': filepath,
-                    'size': os.path.getsize(filepath),
+                    'name': basename + ".3mf",
                     'image_data': encoded_string
                 })
     
@@ -110,12 +108,7 @@ def get_status():
         nozzle_temp = printer.get_nozzle_temperature()
         time_remaining = printer.get_time()
 
-        # Calculate minutes and remaining seconds
-        minutes, seconds = divmod(time_remaining, 60)
-
-        # Format the result into a string (e.g., '16:40')
-        # The :02d ensures that single-digit seconds are zero-padded (e.g., '05' instead of '5')
-        formatted_time_remaining = "{:02d} min. {:02d} sec".format(minutes, seconds)
+        formatted_time_remaining = "{:02d} min.".format(time_remaining)
         light_state = printer.get_light_state()
         return jsonify({
             'success': True,

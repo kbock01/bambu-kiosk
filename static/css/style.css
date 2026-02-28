@@ -89,13 +89,14 @@ h2 {
 /* Files Section */
 .files-grid {
     display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(200px, 1fr);
-    overflow-x: auto;
+    grid-template-columns: repeat(4, minmax(200px, 1fr)); /* 4 columns */
     gap: 1rem;
     padding: 1rem 0;
-}
 
+    max-height: 100px;  /* Set desired height */
+    overflow-y: auto;   /* Enable vertical scroll */
+    overflow-x: hidden; /* Prevent horizontal scroll */
+}
 .file-card {
     background: #f8f9fa;
     border: 3px solid transparent;
@@ -117,8 +118,8 @@ h2 {
 }
 
 .file-icon {
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     margin-bottom: 15px;
     border-radius: 50%;
     overflow: hidden;

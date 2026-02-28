@@ -20,7 +20,7 @@ class Config:
     PRINT_FILES_DIR = os.path.join(os.path.dirname(__file__), 'print_files')
     
     # Allowed file extensions
-    ALLOWED_EXTENSIONS = {'.3mf', '.gcode'}
+    ALLOWED_EXTENSIONS = {'.png'}
     
     # AMS Color Slots (customize based on your setup)
     AMS_SLOTS = {

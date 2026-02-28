@@ -833,6 +833,8 @@ pip install --upgrade pip
 # Clone your project
 git clone <your-repo-url>
 cd bambu-kiosk
+pip install wheel
+pkg install libjpeg-turbo
 
 # Install dependencies
 pip install -r requirements.txt
