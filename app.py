@@ -139,13 +139,13 @@ def start_print():
                 'error': 'No filename provided'
             }), 400
         
-        # Verify file exists
-        filepath = os.path.join(app.config['PRINT_FILES_DIR'], filename)
-        if not os.path.exists(filepath):
-            return jsonify({
-                'success': False,
-                'error': 'File not found'
-            }), 404
+        # # Verify file exists
+        # filepath = os.path.join(app.config['PRINT_FILES_DIR'], filename)
+        # if not os.path.exists(filepath):
+        #     return jsonify({
+        #         'success': False,
+        #         'error': 'File not found'
+        #     }), 404
                 
         # Start print job
         # Note: You'll need to check the actual API method for printing
