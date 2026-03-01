@@ -93,7 +93,7 @@ h2 {
     gap: 1rem;
     padding: 1rem 0;
 
-    max-height: 100px;  /* Set desired height */
+    max-height: 250px;  /* Set desired height */
     overflow-y: auto;   /* Enable vertical scroll */
     overflow-x: hidden; /* Prevent horizontal scroll */
 }

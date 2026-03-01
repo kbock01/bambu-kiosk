@@ -19,26 +19,18 @@
         <main>
             <!-- Printer Status Section -->
             <section class="status-section">
-                <h4>Printer Status</h4>
-                <div class="status-grid">
-                    <div class="status-item">
-                        <span class="status-label">State:</span>
-                        <span id="state" class="status-value">-</span>
-                    </div>
-                    <div class="status-item">
-                        <span class="status-label">Temperature:</span>
-                        <span id="temperature" class="status-value">-</span>
-                    </div>
-                    <div class="status-item">
-                        <span class="status-label">Time Remaining:</span>
-                        <span id="time_remaining" class="status-value">-</span>
-                    </div>
-                </div>
+                <h2>Printer Status</h2>
+                <span class="status-label">State:</span>
+                <span id="state" class="status-value">-</span>
+                <span class="status-label">Temperature:</span>
+                <span id="temperature" class="status-value">-</span>
+                <span class="status-label">Time Remaining:</span>
+                <span id="time_remaining" class="status-value">-</span>
             </section>
 
             <!-- File Selection Section -->
             <section class="files-section">
-                <h4>Pick the pathway you are most interested in</h4>
+                <h3>Pick the pathway you are most interested in (scroll for more options)</h3>
                 <div class="files-grid" id="files-grid">
                     {% for file in files %}
                     <div class="file-card" data-filename="{{ file.name }}">
