@@ -150,7 +150,7 @@ async function updateStatus() {
             
             // Update status fields based on API response
             if (data.status) {
-                if (startButtonClicked && data.status.print_state === 'IDLE')
+                if (startButtonClicked && data.status.print_state === 'FINISH')
                 {
                     startButtonClicked = false;
                     document.getElementById('time_remaining').textContent = '-';
