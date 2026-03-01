@@ -102,6 +102,7 @@ async function startPrint() {
             document.getElementById('active-print-section').style.display = 'block';
             
             // Hide selection sections
+            document.getElementById('files-section').style.display = 'none';
             document.getElementById('ams-section').style.display = 'none';
             document.getElementById('actions-section').style.display = 'none';
             startButtonClicked = true;
@@ -153,6 +154,7 @@ async function updateStatus() {
                 {
                     startButtonClicked = false;
                     document.getElementById('time_remaining').textContent = '-';
+                    document.getElementById('files-section').style.display = 'block';
                     document.getElementById('active-print-section').style.display = 'none';
                     cancelSelection();
                 }

@@ -19,7 +19,7 @@
         <main>
             <!-- Printer Status Section -->
             <section class="status-section">
-                <h2>Printer Status</h2>
+                <h4>Printer Status</h4>
                 <div class="status-grid">
                     <div class="status-item">
                         <span class="status-label">State:</span>
@@ -38,7 +38,7 @@
 
             <!-- File Selection Section -->
             <section class="files-section">
-                <h2>Pick the pathway you are most interested in</h2>
+                <h4>Pick the pathway you are most interested in</h4>
                 <div class="files-grid" id="files-grid">
                     {% for file in files %}
                     <div class="file-card" data-filename="{{ file.name }}">
@@ -52,7 +52,7 @@
             </section>
 
             <!-- AMS Color Selection Section -->
-            <section class="ams-section" id="ams-section">
+            <section class="ams-section" id="ams-section" style="display: none;">
                 <h2>Select a color</h2>
                 <div class="ams-grid">
                     {% for slot_id, slot_info in ams_slots.items() %}
