@@ -64,9 +64,11 @@ def get_available_files():
     files = []
     for filename in os.listdir(files_dir):
         ext = os.path.splitext(filename)[1].lower()
+
         if ext in app.config['ALLOWED_EXTENSIONS']:
             filepath = os.path.join(files_dir, filename)
-            basename, _ = os.path.splitext(filepath)
+            basename, _ = os.path.splitext(filename)
+
             with open(filepath, "rb") as image_file:
                 encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
                 files.append({
