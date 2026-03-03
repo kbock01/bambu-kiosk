@@ -2,6 +2,7 @@ let selectedFile = null;
 let selectedAmsSlot = null;
 let statusInterval = null;
 let startButtonClicked = false;
+let runningTransitionOccurred = false;
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
@@ -150,6 +151,11 @@ async function updateStatus() {
             
             // Update status fields based on API response
             if (data.status) {
+                if (!runningTransitionOccurred && data.status.print_state === 'RUNNING')
+                {
+                    runningTransitionOccurred = true;
+                }
+
                 if (startButtonClicked && data.status.print_state === 'FINISH')
                 {
                     startButtonClicked = false;
