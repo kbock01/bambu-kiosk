@@ -156,8 +156,9 @@ async function updateStatus() {
                     runningTransitionOccurred = true;
                 }
 
-                if (startButtonClicked && data.status.print_state === 'FINISH')
+                if (startButtonClicked && runningTransitionOccurred && data.status.print_state === 'FINISH')
                 {
+                    runningTransitionOccurred = false;
                     startButtonClicked = false;
                     document.getElementById('time_remaining').textContent = '-';
                     document.getElementById('files-section').style.display = 'block';
