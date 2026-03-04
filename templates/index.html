@@ -35,6 +35,7 @@
                     {% for file in files %}
                     <div class="file-card" data-filename="{{ file.name }}">
                         <div class="file-icon"><img src="data:image/png;base64, {{ file.image_data }}" alt="Loaded Image"></div>
+                        <div class="file-display-name">{{ file.display_name }}</div>
                     </div>
                     {% endfor %}
                 </div>

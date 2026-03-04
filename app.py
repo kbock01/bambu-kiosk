@@ -69,10 +69,18 @@ def get_available_files():
             filepath = os.path.join(files_dir, filename)
             basename, _ = os.path.splitext(filename)
 
+            # Parse basename: extract everything before "_Logo" and replace underscores with spaces
+            if "_Logo" in basename:
+                display_name = basename.split("_Logo")[0]
+            else:
+                display_name = basename
+            display_name = display_name.replace("_", " ")
+
             with open(filepath, "rb") as image_file:
                 encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
                 files.append({
                     'name': basename + ".3mf",
+                    'display_name': display_name,
                     'image_data': encoded_string
                 })
     

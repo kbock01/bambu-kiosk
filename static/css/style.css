@@ -137,6 +137,20 @@ h2 {
     display: block;
 }
 
+.file-display-name {
+    font-size: 0.75em;
+    color: #555;
+    margin-top: 8px;
+    line-height: 1.2;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
 .file-name {
     font-weight: 600;
     margin-bottom: 10px;
